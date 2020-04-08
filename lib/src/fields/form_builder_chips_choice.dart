@@ -119,6 +119,8 @@ class _FormBuilderChoiceChipState extends State<FormBuilderChoiceChip> {
             decoration: widget.decoration.copyWith(
               enabled: !_readOnly,
               errorText: field.errorText,
+              filled: false,
+              border: InputBorder.none,
             ),
             child: Wrap(
                 direction: widget.direction,

@@ -2,7 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
 
-class FormBuilderCheckboxList extends StatefulWidget {
+import '../form_builder_field_multi_option.dart';
+
+class Option {
+  final String label;
+  final String value;
+
+  Option(FormBuilderFieldMultipleOption option, int index)
+      : this.label = option.label,
+        this.value = option.values[index];
+
+  bool operator ==(o) =>
+      o is Option && o.label == this.label && o.value == this.value;
+
+  int get hashCode => label.hashCode ^ value.hashCode;
+
+  @override
+  String toString() {
+    return "Option: $label with value $value";
+  }
+}
+
+class FormBuilderMultiCheckboxList extends StatefulWidget {
   final String attribute;
   final List<FormFieldValidator> validators;
   final dynamic initialValue;
@@ -11,7 +32,7 @@ class FormBuilderCheckboxList extends StatefulWidget {
   final ValueChanged onChanged;
   final ValueTransformer valueTransformer;
 
-  final List<FormBuilderFieldOption> options;
+  final List<FormBuilderFieldMultipleOption> options;
   final bool leadingInput;
   final Color activeColor;
   final Color checkColor;
@@ -19,7 +40,7 @@ class FormBuilderCheckboxList extends StatefulWidget {
   final bool tristate;
   final FormFieldSetter onSaved;
 
-  FormBuilderCheckboxList({
+  FormBuilderMultiCheckboxList({
     Key key,
     @required this.attribute,
     @required this.options,
@@ -38,11 +59,11 @@ class FormBuilderCheckboxList extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FormBuilderCheckboxListState createState() =>
-      _FormBuilderCheckboxListState();
+  _FormBuilderMultiCheckboxListState createState() =>
+      _FormBuilderMultiCheckboxListState();
 }
 
-class _FormBuilderCheckboxListState extends State<FormBuilderCheckboxList> {
+class _FormBuilderMultiCheckboxListState extends State<FormBuilderMultiCheckboxList> {
   bool _readOnly = false;
   final GlobalKey<FormFieldState> _fieldKey = GlobalKey<FormFieldState>();
   FormBuilderState _formState;
@@ -65,36 +86,47 @@ class _FormBuilderCheckboxListState extends State<FormBuilderCheckboxList> {
     super.dispose();
   }
 
-  Widget _checkbox(FormFieldState<dynamic> field, int i) {
-    return Checkbox(
-      activeColor: widget.activeColor,
-      checkColor: widget.checkColor,
-      materialTapTargetSize: widget.materialTapTargetSize,
-      tristate: widget.tristate,
-      value: field.value.contains(widget.options[i].value),
-      onChanged: _readOnly
+  Widget _checkbox(FormFieldState<dynamic> field, int i, int j) {
+    return InkWell(
+      onTap: _readOnly
           ? null
-          : (bool value) {
+          : () {
               FocusScope.of(context).requestFocus(FocusNode());
               var currValue = field.value;
-              if (value)
-                currValue.add(widget.options[i].value);
-              else
-                currValue.remove(widget.options[i].value);
+              if (!field.value.contains(Option(widget.options[i], j))) {
+                currValue.add(Option(widget.options[i], j));
+              } else
+                currValue.remove(Option(widget.options[i], j));
               field.didChange(currValue);
               if (widget.onChanged != null) widget.onChanged(currValue);
             },
+      child: Row(
+        children: <Widget>[
+          Container(
+              margin: EdgeInsets.only(left: 8),
+              child: Text(widget.options[i].values[j])),
+          Checkbox(
+            activeColor: widget.activeColor,
+            checkColor: widget.checkColor,
+            materialTapTargetSize: widget.materialTapTargetSize,
+            tristate: widget.tristate,
+            value: field.value.contains(Option(widget.options[i], j)),
+            onChanged: _readOnly
+                ? null
+                : (bool value) {
+                    FocusScope.of(context).requestFocus(FocusNode());
+                    var currValue = field.value;
+                    if (value) {
+                      currValue.add(Option(widget.options[i], j));
+                    } else
+                      currValue.remove(Option(widget.options[i], j));
+                    field.didChange(currValue);
+                    if (widget.onChanged != null) widget.onChanged(currValue);
+                  },
+          ),
+        ],
+      ),
     );
-  }
-
-  Widget _leading(FormFieldState<dynamic> field, int i) {
-    if (widget.leadingInput) return _checkbox(field, i);
-    return null;
-  }
-
-  Widget _trailing(FormFieldState<dynamic> field, int i) {
-    if (!widget.leadingInput) return _checkbox(field, i);
-    return null;
   }
 
   @override
@@ -127,25 +159,22 @@ class _FormBuilderCheckboxListState extends State<FormBuilderCheckboxList> {
           List<Widget> checkboxList = [];
           for (int i = 0; i < widget.options.length; i++) {
             checkboxList.addAll([
-              ListTile(
-                dense: true,
-                isThreeLine: false,
-                contentPadding: EdgeInsets.all(0.0),
-                leading: _leading(field, i),
-                trailing: _trailing(field, i),
-                title: widget.options[i],
-                onTap: _readOnly
-                    ? null
-                    : () {
-                        var currentValue = field.value;
-                        if (!currentValue.contains(widget.options[i].value))
-                          currentValue.add(widget.options[i].value);
-                        else
-                          currentValue.remove(widget.options[i].value);
-                        field.didChange(currentValue);
-                        if (widget.onChanged != null)
-                          widget.onChanged(currentValue);
-                      },
+              Material(
+                type: MaterialType.transparency,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: <Widget>[
+                    widget.options[i].child,
+                    Row(
+                      children: <Widget>[
+                        ...List.generate(widget.options[i].values.length, (j) {
+                          return _checkbox(field, i, j);
+                        }),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               Divider(
                 height: 0.0,

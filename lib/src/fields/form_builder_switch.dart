@@ -19,6 +19,16 @@ class FormBuilderSwitch extends StatefulWidget {
   /// Defaults to [ThemeData.toggleableActiveColor].
   final Color activeColor;
 
+  /// The children's margin inside the [Row]
+  /// 
+  /// Defaults to [EdgeInsets.symmetric(horizonta: 16, vertical: 8)].
+  final EdgeInsets contentPadding;
+
+  /// The border radius used in the [InkWell.borderRadius] property.
+  /// 
+  /// Defaults to [BorderRadius.circular(8)]
+  final BorderRadius borderRadius;
+
   /// The color to use on the track when this switch is on.
   ///
   /// Defaults to [ThemeData.toggleableActiveColor] with the opacity set at 50%.
@@ -82,6 +92,8 @@ class FormBuilderSwitch extends StatefulWidget {
     this.materialTapTargetSize,
     this.dragStartBehavior = DragStartBehavior.start,
     this.onSaved,
+    this.contentPadding = const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+    this.borderRadius = const BorderRadius.all(Radius.circular(8)),
   }) : super(key: key);
 
   @override
@@ -116,66 +128,110 @@ class _FormBuilderSwitchState extends State<FormBuilderSwitch> {
     _readOnly = (_formState?.readOnly == true) ? true : widget.readOnly;
 
     return FormField(
-        key: _fieldKey,
-        enabled: !_readOnly,
-        initialValue: _initialValue ?? false,
-        validator: (val) {
-          for (int i = 0; i < widget.validators.length; i++) {
-            if (widget.validators[i](val) != null)
-              return widget.validators[i](val);
-          }
-          return null;
-        },
-        onSaved: (val) {
-          var transformed;
-          if (widget.valueTransformer != null) {
-            transformed = widget.valueTransformer(val);
-            _formState?.setAttributeValue(widget.attribute, transformed);
-          } else
-            _formState?.setAttributeValue(widget.attribute, val);
-          if (widget.onSaved != null) {
-            widget.onSaved(transformed ?? val);
-          }
-        },
-        builder: (FormFieldState<dynamic> field) {
-          return InputDecorator(
-            decoration: widget.decoration.copyWith(
-              enabled: !_readOnly,
-              errorText: field.errorText,
-            ),
-            child: ListTile(
-              dense: true,
-              isThreeLine: false,
-              contentPadding: EdgeInsets.all(0.0),
-              title: widget.label,
-              trailing: Switch(
-                value: field.value,
-                onChanged: _readOnly
-                    ? null
-                    : (bool value) {
-                        FocusScope.of(context).requestFocus(FocusNode());
-                        field.didChange(value);
-                        if (widget.onChanged != null) widget.onChanged(value);
-                      },
-                activeColor: widget.activeColor,
-                activeThumbImage: widget.activeThumbImage,
-                activeTrackColor: widget.activeTrackColor,
-                dragStartBehavior: widget.dragStartBehavior,
-                inactiveThumbColor: widget.inactiveThumbColor,
-                inactiveThumbImage: widget.activeThumbImage,
-                inactiveTrackColor: widget.inactiveTrackColor,
-                materialTapTargetSize: widget.materialTapTargetSize,
-              ),
+      key: _fieldKey,
+      enabled: !_readOnly,
+      initialValue: _initialValue ?? false,
+      validator: (val) {
+        for (int i = 0; i < widget.validators.length; i++) {
+          if (widget.validators[i](val) != null)
+            return widget.validators[i](val);
+        }
+        return null;
+      },
+      onSaved: (val) {
+        var transformed;
+        if (widget.valueTransformer != null) {
+          transformed = widget.valueTransformer(val);
+          _formState?.setAttributeValue(widget.attribute, transformed);
+        } else
+          _formState?.setAttributeValue(widget.attribute, val);
+        if (widget.onSaved != null) {
+          widget.onSaved(transformed ?? val);
+        }
+      },
+      builder: (FormFieldState<dynamic> field) {
+        return InputDecorator(
+          decoration: widget.decoration.copyWith(
+            enabled: !_readOnly,
+            errorText: field.errorText,
+            /*filled: true,
+            fillColor: Colors.transparent,*/
+          ),
+          child: Material(
+            type: MaterialType.transparency,
+            child: InkWell(
+              borderRadius: widget.borderRadius,
               onTap: _readOnly
                   ? null
                   : () {
                       FocusScope.of(context).requestFocus(FocusNode());
                       bool newValue = !(field.value ?? false);
                       field.didChange(newValue);
-                      if (widget.onChanged != null) widget.onChanged(newValue);
+                      if (widget.onChanged != null)
+                        widget.onChanged(newValue);
                     },
+              child: Container(
+                margin: widget.contentPadding,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    widget.label,
+                    Switch(
+                      value: field.value,
+                      onChanged: _readOnly
+                          ? null
+                          : (bool value) {
+                              FocusScope.of(context).requestFocus(FocusNode());
+                              field.didChange(value);
+                              if (widget.onChanged != null)
+                                widget.onChanged(value);
+                            },
+                      activeColor: widget.activeColor,
+                      activeThumbImage: widget.activeThumbImage,
+                      activeTrackColor: widget.activeTrackColor,
+                      dragStartBehavior: widget.dragStartBehavior,
+                      inactiveThumbColor: widget.inactiveThumbColor,
+                      inactiveThumbImage: widget.activeThumbImage,
+                      inactiveTrackColor: widget.inactiveTrackColor,
+                      materialTapTargetSize: widget.materialTapTargetSize,
+                    ),
+                  ],
+                  /* dense: true,
+                  isThreeLine: false,
+                  contentPadding: widget.contentPadding,
+                  title: widget.label,
+                  trailing: Switch(
+                    value: field.value,
+                    onChanged: _readOnly
+                        ? null
+                        : (bool value) {
+                            FocusScope.of(context).requestFocus(FocusNode());
+                            field.didChange(value);
+                            if (widget.onChanged != null) widget.onChanged(value);
+                          },
+                    activeColor: widget.activeColor,
+                    activeThumbImage: widget.activeThumbImage,
+                    activeTrackColor: widget.activeTrackColor,
+                    dragStartBehavior: widget.dragStartBehavior,
+                    inactiveThumbColor: widget.inactiveThumbColor,
+                    inactiveThumbImage: widget.activeThumbImage,
+                    inactiveTrackColor: widget.inactiveTrackColor,
+                    materialTapTargetSize: widget.materialTapTargetSize,
+                  ),
+                  onTap: _readOnly
+                      ? null
+                      : () {
+                          FocusScope.of(context).requestFocus(FocusNode());
+                          bool newValue = !(field.value ?? false);
+                          field.didChange(newValue);
+                          if (widget.onChanged != null) widget.onChanged(newValue);
+                        },*/
+                ),
+              ),
             ),
-          );
-        });
+          ),
+        );
+      },
+    );
   }
 }
