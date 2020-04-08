@@ -101,6 +101,8 @@ class _FormBuilderSignaturePadState extends State<FormBuilderSignaturePad> {
           decoration: widget.decoration.copyWith(
             enabled: !_readOnly,
             errorText: field.errorText,
+            filled: false,
+            border: InputBorder.none,
           ),
           child: Column(
             children: <Widget>[

@@ -123,6 +123,8 @@ class _FormBuilderCheckboxState extends State<FormBuilderCheckbox> {
           decoration: widget.decoration.copyWith(
             enabled: !_readOnly,
             errorText: field.errorText,
+            filled: false,
+            border: InputBorder.none,
           ),
           child: ListTile(
             dense: true,

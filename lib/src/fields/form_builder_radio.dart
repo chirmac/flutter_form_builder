@@ -142,6 +142,8 @@ class _FormBuilderRadioState extends State<FormBuilderRadio> {
           decoration: widget.decoration.copyWith(
             enabled: !_readOnly,
             errorText: field.errorText,
+            filled: false,
+            border: InputBorder.none,
           ),
           child: Column(
             children: radioList,
