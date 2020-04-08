@@ -154,8 +154,8 @@ class _FormBuilderSwitchState extends State<FormBuilderSwitch> {
           decoration: widget.decoration.copyWith(
             enabled: !_readOnly,
             errorText: field.errorText,
-            /*filled: true,
-            fillColor: Colors.transparent,*/
+            filled: false,
+            border: InputBorder.none,
           ),
           child: Material(
             type: MaterialType.transparency,
