@@ -100,6 +100,7 @@ class _FormBuilderSignaturePadState extends State<FormBuilderSignaturePad> {
         return InputDecorator(
           decoration: widget.decoration.copyWith(
             enabled: !_readOnly,
+            contentPadding: EdgeInsets.zero,
             errorText: field.errorText,
             filled: false,
             border: InputBorder.none,

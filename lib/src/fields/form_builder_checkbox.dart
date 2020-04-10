@@ -124,6 +124,7 @@ class _FormBuilderCheckboxState extends State<FormBuilderCheckbox> {
             enabled: !_readOnly,
             errorText: field.errorText,
             filled: false,
+            contentPadding: EdgeInsets.zero,
             border: InputBorder.none,
           ),
           child: ListTile(
