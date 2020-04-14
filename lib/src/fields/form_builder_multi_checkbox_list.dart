@@ -12,6 +12,8 @@ class Option {
       : this.label = option.label,
         this.value = option.values[index];
 
+  Option.fromJSON({@required this.label, @required this.value});
+
   bool operator ==(o) =>
       o is Option && o.label == this.label && o.value == this.value;
 
