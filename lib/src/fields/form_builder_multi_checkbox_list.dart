@@ -110,7 +110,7 @@ class _FormBuilderMultiCheckboxListState
         children: <Widget>[
           Container(
               margin: EdgeInsets.only(left: 8),
-              child: Text(widget.options[i].values[j])),
+              child: Tooltip(message: "${widget.options[i].values[j]}", child: Text(widget.options[i].values[j], overflow: TextOverflow.ellipsis,))),
           Checkbox(
             activeColor: widget.activeColor,
             checkColor: widget.checkColor,
