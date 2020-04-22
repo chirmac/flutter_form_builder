@@ -5,23 +5,25 @@ import 'package:flutter_form_builder/flutter_form_builder.dart';
 import '../form_builder_field_multi_option.dart';
 
 class Option {
-  final String label;
-  final String value;
+  final String name;
+  final bool front;
+  final bool back;
 
-  Option(FormBuilderFieldMultipleOption option, int index)
-      : this.label = option.label,
-        this.value = option.values[index];
+  Option(this.name, {this.back = false, this.front = false});
 
-  Option.fromJSON({@required this.label, @required this.value});
+  //Option.fromJSON({@required this.label, @required this.value});
 
   bool operator ==(o) =>
-      o is Option && o.label == this.label && o.value == this.value;
+      o is Option &&
+      o.name == this.name &&
+      o.front == this.front &&
+      o.back == this.back;
 
-  int get hashCode => label.hashCode ^ value.hashCode;
+  int get hashCode => name.hashCode ^ front.hashCode * back.hashCode;
 
   @override
   String toString() {
-    return "Option: $label with value $value";
+    return "Option: $name with values: Front - $front and Back - $back";
   }
 }
 
@@ -65,7 +67,8 @@ class FormBuilderMultiCheckboxList extends StatefulWidget {
       _FormBuilderMultiCheckboxListState();
 }
 
-class _FormBuilderMultiCheckboxListState extends State<FormBuilderMultiCheckboxList> {
+class _FormBuilderMultiCheckboxListState
+    extends State<FormBuilderMultiCheckboxList> {
   bool _readOnly = false;
   final GlobalKey<FormFieldState> _fieldKey = GlobalKey<FormFieldState>();
   FormBuilderState _formState;
@@ -95,10 +98,11 @@ class _FormBuilderMultiCheckboxListState extends State<FormBuilderMultiCheckboxL
           : () {
               FocusScope.of(context).requestFocus(FocusNode());
               var currValue = field.value;
-              if (!field.value.contains(Option(widget.options[i], j))) {
-                currValue.add(Option(widget.options[i], j));
-              } else
-                currValue.remove(Option(widget.options[i], j));
+              if (j == 0) {
+                field.value[i].back = !field.value[i].back;
+              } else {
+                field.value[i].front = !field.value[i].front;
+              }
               field.didChange(currValue);
               if (widget.onChanged != null) widget.onChanged(currValue);
             },
@@ -112,16 +116,17 @@ class _FormBuilderMultiCheckboxListState extends State<FormBuilderMultiCheckboxL
             checkColor: widget.checkColor,
             materialTapTargetSize: widget.materialTapTargetSize,
             tristate: widget.tristate,
-            value: field.value.contains(Option(widget.options[i], j)),
+            value: j == 0 ? field.value[i].back : field.value[i].front,
             onChanged: _readOnly
                 ? null
                 : (bool value) {
                     FocusScope.of(context).requestFocus(FocusNode());
                     var currValue = field.value;
-                    if (value) {
-                      currValue.add(Option(widget.options[i], j));
-                    } else
-                      currValue.remove(Option(widget.options[i], j));
+                    if (j == 0) {
+                      field.value[i].back = !field.value[i].back;
+                    } else {
+                      field.value[i].front = !field.value[i].front;
+                    }
                     field.didChange(currValue);
                     if (widget.onChanged != null) widget.onChanged(currValue);
                   },
@@ -170,7 +175,7 @@ class _FormBuilderMultiCheckboxListState extends State<FormBuilderMultiCheckboxL
                     widget.options[i].child,
                     Row(
                       children: <Widget>[
-                        ...List.generate(widget.options[i].values.length, (j) {
+                        ...List.generate(2, (j) {
                           return _checkbox(field, i, j);
                         }),
                       ],
